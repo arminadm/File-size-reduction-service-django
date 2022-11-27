@@ -1,4 +1,7 @@
 from django.db import models
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+from .task import convert_video
 
 # Create your models here.
 class UploadedFiles(models.Model):
@@ -12,3 +15,9 @@ class UploadedFiles(models.Model):
 
     def __str__(self):
         return f"uploaded file: id={self.id}"
+    
+
+@receiver(post_save, sender=UploadedFiles)
+def start_convert(sender, instance, created, **kwargs):
+    if created:
+        convert_video.delay(instance.video_org.name)

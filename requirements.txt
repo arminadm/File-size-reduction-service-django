@@ -1,11 +1,9 @@
-
 django >3.2,<3.3
-pillow
 djangorestframework
 djangorestframework-simplejwt
 pytest
 pytest-django
 celery
 redis
-django-celery-beat
 django-redis
+ffmpeg-python
