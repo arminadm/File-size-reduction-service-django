@@ -9,20 +9,20 @@ def ffmpeg_covert_progress(video_link, res):
     command_str = f"ffmpeg -i {video_link} -vf scale={res}:{res} {out_path}"
     result = os.system(command_str)
     print(f"##### RESULT : {result} #####")
-    return out_path
+    return out_path, result
 
 @shared_task
 def convert_video(video_link, id):
-    # calculate progress duration time
+   # calculate progress duration time
     start_time = datetime.now()
     instance = UploadedFiles.objects.get(id=id)
     
     # generate 240p
-    out_path = ffmpeg_covert_progress(video_link, 240)
+    out_path, result = ffmpeg_covert_progress(video_link, 240)
     instance.video240 = out_path
 
     # generate 360p
-    out_path = ffmpeg_covert_progress(video_link, 360)
+    out_path, result = ffmpeg_covert_progress(video_link, 360)
     instance.video360 = out_path
 
     end_time = datetime.now()
