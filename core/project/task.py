@@ -1,26 +1,32 @@
+import os    
 from celery import shared_task
-from time import sleep
-import ffmpeg
+from datetime import datetime
+from .models import UploadedFiles
+
+def ffmpeg_covert_progress(video_link, res):
+    video_name = video_link.split('videos/org/')[1]
+    out_path = f"./videos/{res}/{video_name}"
+    command_str = f"ffmpeg -i {video_link} -vf scale={res}:{res} {out_path}"
+    result = os.system(command_str)
+    print(f"##### RESULT : {result} #####")
+    return out_path
 
 @shared_task
-def convert_video(video_link):
-    video_name = video_link.split('videos/org/')[1]
-    # print("##############################################1")
-    # stream = ffmpeg.input(video_link)
-    # print("##############################################2")
-    # stream = ffmpeg.hflip(stream)
-    # print("##############################################3")
-    # stream = ffmpeg.output(stream, f"videos240{video_name}")
-    # print("##############################################4")
-    # ffmpeg.run(stream)
-    # print("##############################################5")
-    # print('#######################################')
-    (
-        ffmpeg
-        .input('input.mp4')
-        .hflip()
-        .output('output.mp4')
-        .run()
-    )   
-    print(video_name)
-    print(video_link)
+def convert_video(video_link, id):
+    # calculate progress duration time
+    start_time = datetime.now()
+    instance = UploadedFiles.objects.get(id=id)
+    
+    # generate 240p
+    out_path = ffmpeg_covert_progress(video_link, 240)
+    instance.video240 = out_path
+
+    # generate 360p
+    out_path = ffmpeg_covert_progress(video_link, 360)
+    instance.video360 = out_path
+
+    end_time = datetime.now()
+    duration = (end_time - start_time).seconds
+    instance.duration = duration
+
+    instance.save()

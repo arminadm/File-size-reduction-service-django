@@ -11,5 +11,7 @@ COPY ./core /app/
 RUN pip3 install --upgrade pip 
 RUN pip3 install -r requirements.txt
 
+RUN apt update && apt install ffmpeg -y
+
 RUN python manage.py makemigrations
 RUN python manage.py migrate
